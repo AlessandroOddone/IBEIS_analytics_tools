@@ -9,7 +9,7 @@ public class QueryRecord {
     private double score;
     private boolean sameGiraffe;
     private boolean giraffe;
-    private boolean bestRecognizer;
+    private boolean bestRecognizer = false;
 
     public IbeisAnnotation getQueryAnnotation() {
         return queryAnnotation;
@@ -57,5 +57,11 @@ public class QueryRecord {
 
     public void setBestRecognizer(boolean bestRecognizer) {
         this.bestRecognizer = bestRecognizer;
+    }
+
+    @Override
+    public String toString() {
+        return "[query_aid: " + queryAnnotation.getId() + ", db_aid: " + dbAnnotation.getId() + ", score:" + score +
+                ", sameGiraffe: " + sameGiraffe + ", giraffe: " + giraffe + ", best_rec: " + bestRecognizer + "]";
     }
 }
