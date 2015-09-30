@@ -1,5 +1,5 @@
 # image table
-# NumData 114
+# NumData 144
 #   gid,               gname,    aif
       1,         zebra13.jpg,  False
       2,    test_potoka9.JPG,  False
@@ -115,3 +115,33 @@
     112,   test_franny12.JPG,  False
     113,    test_jasiri7.JPG,  False
     114,          zebra5.jpg,  False
+    115,        jasiri15.JPG,  False
+    116,       arnieta13.JPG,  False
+    117,        arnieta9.JPG,  False
+    118,         jasiri3.JPG,  False
+    119,         franny8.JPG,  False
+    120,       jasiri12.jpeg,  False
+    121,         mithra5.JPG,  False
+    122,        potoka15.JPG,  False
+    123,       arnieta12.JPG,  False
+    124,         jasiri4.JPG,  False
+    125,         mithra3.JPG,  False
+    126,        potoka10.JPG,  False
+    127,        jasiri16.JPG,  False
+    128,        jasiri14.JPG,  False
+    129,        franny12.JPG,  False
+    130,         jasiri8.JPG,  False
+    131,         jasiri6.JPG,  False
+    132,        potoka11.JPG,  False
+    133,         jasiri5.JPG,  False
+    134,       arnieta11.JPG,  False
+    135,       arnieta16.JPG,  False
+    136,       franny16.jpeg,  False
+    137,       franny14.jpeg,  False
+    138,        potoka14.JPG,  False
+    139,         franny9.JPG,  False
+    140,         franny3.JPG,  False
+    141,         franny2.JPG,  False
+    142,        potoka16.JPG,  False
+    143,         potoka3.JPG,  False
+    144,         potoka2.JPG,  False
