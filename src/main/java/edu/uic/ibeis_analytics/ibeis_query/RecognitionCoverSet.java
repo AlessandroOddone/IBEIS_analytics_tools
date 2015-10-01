@@ -4,12 +4,12 @@ import edu.uic.ibeis_java_api.api.IbeisAnnotation;
 
 import java.util.List;
 
-public class AnnotationCoverSet {
+public class RecognitionCoverSet {
 
     private IbeisAnnotation annotation;
     private List<IbeisAnnotation> coveredAnnotations;
 
-    public AnnotationCoverSet(IbeisAnnotation annotation) {
+    public RecognitionCoverSet(IbeisAnnotation annotation) {
         this.annotation = annotation;
     }
 

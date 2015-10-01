@@ -1,7 +1,9 @@
 package edu.uic.ibeis_analytics.scripts.big_database;
 
 import com.opencsv.CSVReader;
-import edu.uic.ibeis_analytics.ibeis_query.AnnotationCoverSetsCollection;
+import edu.uic.ibeis_analytics.ibeis_query.RecognitionCoverSet;
+import edu.uic.ibeis_analytics.ibeis_query.RecognitionCoverSetsCollection;
+import edu.uic.ibeis_analytics.ibeis_query.brookfield_zoo.giraffes.QueryRecord;
 import edu.uic.ibeis_analytics.ibeis_query.brookfield_zoo.giraffes.QueryRecordsCollection;
 import edu.uic.ibeis_java_api.api.Ibeis;
 import edu.uic.ibeis_java_api.api.IbeisAnnotation;
@@ -18,17 +20,14 @@ public class ComputeAnnotsCoverSetsBigDatabase {
 
     private static Ibeis ibeis = new Ibeis();
     private static List<IbeisAnnotation> dbAnnotations = new ArrayList<>();
-    private static List<IbeisAnnotation> queryAnnotations = new ArrayList<>();
 
     private static final String QUERY_RECORDS_JSON = "src/main/resources/query_records_big_db.json";
     private static QueryRecordsCollection queryRecordsCollection = null;
 
     private static final String THRESHOLDS_CSV = "src/main/resources/computed_thresholds_big_db.csv";
-    private static final int IS_A_GIRAFFE_THRESHOLDS_INDEX = 0;
-    private static final int RECOGNITION_THRESHOLDS_INDEX = 1;
-    private static HashMap<Long,Double>[] thresholdsHashMaps = new HashMap[2];
+    private static HashMap<Long,Double> recognitionThresholdsHashMaps = new HashMap();
 
-    private static final String COVER_SETS_JSON = "src/main/resources/computed_cover_sets_big_db.csv";
+    private static final String RECOGNITION_COVER_SETS_JSON = "src/main/resources/computed_cover_sets_big_db.csv";
 
     public static void main(String[] args) {
         init();
@@ -48,7 +47,23 @@ public class ComputeAnnotsCoverSetsBigDatabase {
     }
 
     private static void computeCoverSets() {
+        RecognitionCoverSetsCollection coverSetsCollection = new RecognitionCoverSetsCollection();
 
+        for(IbeisAnnotation annotation : dbAnnotations) {
+            RecognitionCoverSet coverSet = new RecognitionCoverSet(annotation);
+            long annotationId = annotation.getId();
+
+            for(QueryRecord queryRecord : queryRecordsCollection.getQueryRecords()) {
+                if(queryRecord.getDbAnnotation().getId() == annotationId) {
+                    if(queryRecord.getScore() >= recognitionThresholdsHashMaps.get(annotationId) &&
+                            queryRecord.isSameGiraffe()) {
+                        coverSet.add(queryRecord.getQueryAnnotation());
+                    }
+                }
+            }
+            coverSetsCollection.add(coverSet);
+        }
+        saveCoverSets(coverSetsCollection);
     }
 
     private static void getRecordsCollectionFromFile() {
@@ -68,8 +83,7 @@ public class ComputeAnnotsCoverSetsBigDatabase {
     }
 
     private static void getThresholdsHashmapFromFile() {
-        thresholdsHashMaps[IS_A_GIRAFFE_THRESHOLDS_INDEX] = new HashMap<>();
-        thresholdsHashMaps[RECOGNITION_THRESHOLDS_INDEX] = new HashMap<>();
+        recognitionThresholdsHashMaps = new HashMap<>();
 
         try {
             CSVReader reader = new CSVReader(new FileReader(THRESHOLDS_CSV));
@@ -79,9 +93,7 @@ public class ComputeAnnotsCoverSetsBigDatabase {
             reader.readNext();
 
             while ((nextLine = reader.readNext()) != null) {
-                thresholdsHashMaps[IS_A_GIRAFFE_THRESHOLDS_INDEX].put(Long.parseLong(nextLine[0].replaceAll("\\s", "")),
-                        Double.parseDouble(nextLine[2].replaceAll("\\s", "")));
-                thresholdsHashMaps[RECOGNITION_THRESHOLDS_INDEX].put(Long.parseLong(nextLine[0].replaceAll("\\s", "")),
+                recognitionThresholdsHashMaps.put(Long.parseLong(nextLine[0].replaceAll("\\s", "")),
                         Double.parseDouble(nextLine[3].replaceAll("\\s", "")));
             }
         } catch (IOException e) {
@@ -89,10 +101,10 @@ public class ComputeAnnotsCoverSetsBigDatabase {
         }
     }
 
-    private static void saveCoverSets(AnnotationCoverSetsCollection coverSetsCollection) {
+    private static void saveCoverSets(RecognitionCoverSetsCollection coverSetsCollection) {
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(COVER_SETS_JSON));
+            writer = new BufferedWriter(new FileWriter(RECOGNITION_COVER_SETS_JSON));
             writer.write(coverSetsCollection.toJsonString());
         } catch (IOException e) {
             e.printStackTrace();
