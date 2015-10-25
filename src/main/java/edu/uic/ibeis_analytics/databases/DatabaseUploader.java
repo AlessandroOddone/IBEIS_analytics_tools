@@ -1,13 +1,8 @@
 package edu.uic.ibeis_analytics.databases;
 
 import edu.uic.ibeis_analytics.hotspotter_output_files_model.*;
-import edu.uic.ibeis_java_api.api.Ibeis;
-import edu.uic.ibeis_java_api.api.IbeisEncounter;
-import edu.uic.ibeis_java_api.api.IbeisImage;
-import edu.uic.ibeis_java_api.api.IbeisIndividual;
-import edu.uic.ibeis_java_api.exceptions.BadHttpRequestException;
-import edu.uic.ibeis_java_api.exceptions.IndividualNameAlreadyExistsException;
-import edu.uic.ibeis_java_api.exceptions.UnsuccessfulHttpRequestException;
+import edu.uic.ibeis_java_api.api.*;
+import edu.uic.ibeis_java_api.exceptions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,12 +90,24 @@ public class DatabaseUploader {
         ibeisImageHashMap = new HashMap<>();
 
         for (ImageTableEntry imageTableEntry : imageTable.getTableEntries()) {
+            IbeisImage ibeisImage = null;
             try {
-                IbeisImage ibeisImage = ibeis.uploadImage(imageTableEntry.getFilepath());
-                ibeisImage.addToEncounter(encounter);
-                ibeisImageHashMap.put(imageTableEntry.getId(),ibeisImage);
-            } catch (Exception e) {
+                ibeisImage = ibeis.uploadImage(imageTableEntry.getFilepath());
+            } catch (UnsupportedImageFileTypeException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (UnsuccessfulHttpRequestException e) {
+                e.printStackTrace();
+            } catch (BadHttpRequestException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    ibeisImage.addToEncounter(encounter);
+                    ibeisImageHashMap.put(imageTableEntry.getId(),ibeisImage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return  ibeisImageHashMap;
@@ -109,8 +116,11 @@ public class DatabaseUploader {
     private static void addAnnotations() {
         try {
             for (ChipTableEntry chipTableEntry : chipTable.getTableEntries()) {
-                ibeis.addAnnotation(ibeisImageHashMap.get(chipTableEntry.getImageId()),chipTableEntry.getBoundingBox())
-                        .setIndividual(ibeisIndividualHashMap.get(chipTableEntry.getNameId()));
+                IbeisImage image = ibeisImageHashMap.get(chipTableEntry.getImageId());
+                if (image.getAnnotations().isEmpty()) {
+                    ibeis.addAnnotation(image,chipTableEntry.getBoundingBox())
+                            .setIndividual(ibeisIndividualHashMap.get(chipTableEntry.getNameId()));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

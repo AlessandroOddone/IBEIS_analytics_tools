@@ -1,4 +1,4 @@
-package edu.uic.ibeis_analytics.ibeis_query;
+package edu.uic.ibeis_analytics.ibeis_query.cover_set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,6 +27,6 @@ public class RecognitionCoverSetsCollection {
     }
 
     private static Gson getGson() {
-        return new GsonBuilder().serializeNulls().create();
+        return new GsonBuilder().serializeNulls().serializeSpecialFloatingPointValues().create();
     }
 }

@@ -1,33 +1,30 @@
 package edu.uic.ibeis_analytics.scripts.big_database;
 
 import com.opencsv.CSVReader;
-import edu.uic.ibeis_analytics.ibeis_query.RecognitionCoverSet;
-import edu.uic.ibeis_analytics.ibeis_query.RecognitionCoverSetsCollection;
+import edu.uic.ibeis_analytics.ibeis_query.AnnotationDbElement;
 import edu.uic.ibeis_analytics.ibeis_query.brookfield_zoo.giraffes.QueryRecord;
 import edu.uic.ibeis_analytics.ibeis_query.brookfield_zoo.giraffes.QueryRecordsCollection;
+import edu.uic.ibeis_analytics.ibeis_query.cover_set.RecognitionCoverSet;
+import edu.uic.ibeis_analytics.ibeis_query.cover_set.RecognitionCoverSetsCollection;
 import edu.uic.ibeis_java_api.api.Ibeis;
 import edu.uic.ibeis_java_api.api.IbeisAnnotation;
 import edu.uic.ibeis_java_api.api.IbeisImage;
+import edu.uic.ibeis_java_api.api.IbeisIndividual;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ComputeAnnotsCoverSetsBigDatabase {
+public class ComputeAnnotationsCoverSetsBigDb {
 
     private static final int BIG_DB_ENCOUNTER_ID = 4;
 
     private static Ibeis ibeis = new Ibeis();
     private static List<IbeisAnnotation> dbAnnotations = new ArrayList<>();
-
-    private static final String QUERY_RECORDS_JSON = "src/main/resources/query_records_big_db.json";
     private static QueryRecordsCollection queryRecordsCollection = null;
-
-    private static final String THRESHOLDS_CSV = "src/main/resources/computed_thresholds_big_db.csv";
+    private static HashMap<Long,Double> isGiraffeThresholdsHashMaps = new HashMap();
     private static HashMap<Long,Double> recognitionThresholdsHashMaps = new HashMap();
-
-    private static final String RECOGNITION_COVER_SETS_JSON = "src/main/resources/computed_cover_sets_big_db.csv";
 
     public static void main(String[] args) {
         init();
@@ -49,19 +46,32 @@ public class ComputeAnnotsCoverSetsBigDatabase {
     private static void computeCoverSets() {
         RecognitionCoverSetsCollection coverSetsCollection = new RecognitionCoverSetsCollection();
 
+        IbeisIndividual individual = null;
         for(IbeisAnnotation annotation : dbAnnotations) {
-            RecognitionCoverSet coverSet = new RecognitionCoverSet(annotation);
-            long annotationId = annotation.getId();
+            try {
+                individual = annotation.getIndividual();
+                String individualName = individual.getName();
+                if (!individualName.equals("Zebra") && !individualName.equals("Other")) {
+                    double isGiraffeThreshold = isGiraffeThresholdsHashMaps.get(annotation.getId());
+                    double recognitionThreshold = recognitionThresholdsHashMaps.get(annotation.getId());
+                    RecognitionCoverSet coverSet = new RecognitionCoverSet(new AnnotationDbElement(annotation,
+                            individual, isGiraffeThreshold, recognitionThreshold));
 
-            for(QueryRecord queryRecord : queryRecordsCollection.getQueryRecords()) {
-                if(queryRecord.getDbAnnotation().getId() == annotationId) {
-                    if(queryRecord.getScore() >= recognitionThresholdsHashMaps.get(annotationId) &&
-                            queryRecord.isSameGiraffe()) {
-                        coverSet.add(queryRecord.getQueryAnnotation());
+                    for(QueryRecord queryRecord : queryRecordsCollection.getQueryRecords()) {
+                        if(queryRecord.getDbAnnotation().getId() == annotation.getId()) {
+                            if(queryRecord.getScore() >= recognitionThreshold &&
+                                    queryRecord.isSameGiraffe()) {
+                                coverSet.add(queryRecord.getQueryAnnotation());
+                            }
+                        }
                     }
+                    coverSetsCollection.add(coverSet);
                 }
             }
-            coverSetsCollection.add(coverSet);
+            catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
         }
         saveCoverSets(coverSetsCollection);
     }
@@ -69,7 +79,7 @@ public class ComputeAnnotsCoverSetsBigDatabase {
     private static void getRecordsCollectionFromFile() {
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(QUERY_RECORDS_JSON));
+            reader = new BufferedReader(new FileReader(FilePath.ONE_VS_ONE_QUERY_RECORDS_JSON.toString()));
             queryRecordsCollection = QueryRecordsCollection.fromJsonString(reader.readLine());
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,13 +96,15 @@ public class ComputeAnnotsCoverSetsBigDatabase {
         recognitionThresholdsHashMaps = new HashMap<>();
 
         try {
-            CSVReader reader = new CSVReader(new FileReader(THRESHOLDS_CSV));
+            CSVReader reader = new CSVReader(new FileReader(FilePath.ONE_VS_ONE_THRESHOLDS_CSV.toString()));
             String[] nextLine;
 
             // skip headers
             reader.readNext();
 
             while ((nextLine = reader.readNext()) != null) {
+                isGiraffeThresholdsHashMaps.put(Long.parseLong(nextLine[0].replaceAll("\\s", "")),
+                        Double.parseDouble(nextLine[2].replaceAll("\\s", "")));
                 recognitionThresholdsHashMaps.put(Long.parseLong(nextLine[0].replaceAll("\\s", "")),
                         Double.parseDouble(nextLine[3].replaceAll("\\s", "")));
             }
@@ -104,7 +116,7 @@ public class ComputeAnnotsCoverSetsBigDatabase {
     private static void saveCoverSets(RecognitionCoverSetsCollection coverSetsCollection) {
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(RECOGNITION_COVER_SETS_JSON));
+            writer = new BufferedWriter(new FileWriter(FilePath.RECOGNITION_COVER_SETS_JSON.toString()));
             writer.write(coverSetsCollection.toJsonString());
         } catch (IOException e) {
             e.printStackTrace();

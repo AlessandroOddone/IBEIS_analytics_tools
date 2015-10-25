@@ -29,9 +29,9 @@ public class DatabaseUploadScript {
         //new DatabaseUploader(new File(TEST_MAIN_FOLDER), TEST_ENCOUNTER_NAME, individuals).execute();
 
         //upload validation db
-        //new DatabaseUploader(new File(VALIDATION_MAIN_FOLDER), VALIDATION_ENCOUNTER_NAME, individuals).execute();
+        new DatabaseUploader(new File(VALIDATION_MAIN_FOLDER), VALIDATION_ENCOUNTER_NAME, individuals).execute();
 
         //upload big db
-        new DatabaseUploader(new File(BIG_DB_MAIN_FOLDER), BIG_DB_ENCOUNTER_NAME, individuals).execute();
+        //new DatabaseUploader(new File(BIG_DB_MAIN_FOLDER), BIG_DB_ENCOUNTER_NAME, individuals).execute();
     }
 }

@@ -73,7 +73,7 @@ public class OverallThresholdsVsTestPlotsScript {
     private static void getQueryRecords() {
         queryRecordsCollection = getRecordsCollectionFromFile();
         if (queryRecordsCollection == null) {
-            queryRecordsCollection = new QueryAgainstDb(dbAnnotations,queryAnnotations).execute();
+            queryRecordsCollection = new QueryAgainstDb(dbAnnotations,queryAnnotations).execute().getRecordsCollection();
             saveRecordsCollection(queryRecordsCollection);
         }
     }

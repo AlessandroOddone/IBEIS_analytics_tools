@@ -12,25 +12,28 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComputePerAnnotationThresholdsBigDatabase {
+public class ComputeThresholdsOneVsOne {
     private static final int BIG_DB_ENCOUNTER_ID = 4;
+
+    private static final double STEP = 0.001;
+    private static final double MAX_THRESHOLD = 100;
 
     private static Ibeis ibeis = new Ibeis();
     private static List<IbeisAnnotation> dbAnnotations = new ArrayList<>();
-
-    private static final String QUERY_RECORDS_JSON = "src/main/resources/query_records_big_db.json";
     private static QueryRecordsCollection queryRecordsCollection = null;
-
-    private static final String THRESHOLDS_OUT_FILE = "src/main/resources/computed_thresholds_big_db.csv";
     private static CSVWriter outputWriter;
-
-    private static final double STEP = 0.001;
-    private static final double MAX_THRESHOLD = 30;
-    private static final int ARRAY_LENGTH = Double.valueOf(MAX_THRESHOLD / STEP).intValue() + 1;
 
     public static void main(String[] args) {
         init();
         getQueryRecords();
+
+        try {
+            outputWriter = new CSVWriter(new FileWriter(FilePath.ONE_VS_ONE_THRESHOLDS_CSV.toString()));
+            String[] entries = "annotation id#individual#is-a-giraffe threshold#recognition threshold".split("#");
+            outputWriter.writeNext(entries);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (IbeisAnnotation ibeisAnnotation : dbAnnotations) {
             computeThresholds(ibeisAnnotation);
         }
@@ -46,10 +49,6 @@ public class ComputePerAnnotationThresholdsBigDatabase {
             for(IbeisImage ibeisImage : ibeis.getEncounterById(BIG_DB_ENCOUNTER_ID).getImages()) {
                 dbAnnotations.addAll(ibeisImage.getAnnotations());
             }
-            outputWriter = new CSVWriter(new FileWriter(THRESHOLDS_OUT_FILE));
-            String[] entries = "annotation id#individual#is-a-giraffe threshold#recognition threshold".split("#");
-            outputWriter.writeNext(entries);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -58,7 +57,7 @@ public class ComputePerAnnotationThresholdsBigDatabase {
     private static void getQueryRecords() {
         queryRecordsCollection = getRecordsCollectionFromFile();
         if (queryRecordsCollection == null) {
-            queryRecordsCollection = new QueryAgainstDb(dbAnnotations,dbAnnotations).execute();
+            queryRecordsCollection = new QueryAgainstDb(dbAnnotations,dbAnnotations, QueryAgainstDb.QueryType.ONE_VS_ONE).execute().getRecordsCollection();
             saveRecordsCollection(queryRecordsCollection);
         }
     }
@@ -115,21 +114,22 @@ public class ComputePerAnnotationThresholdsBigDatabase {
             }
         }
         String individualName = null;
-
         try {
             individualName = annotation.getIndividual().getName();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            String[] entries = {Long.toString(annotation.getId()),individualName,Double.toString(isGiraffeThreshold),Double.toString(recognitionThreshold)};
-            outputWriter.writeNext(entries);
+            if(!individualName.equals("Zebra") && !individualName.equals("Other")) {
+                String[] entries = {Long.toString(annotation.getId()),individualName,Double.toString(isGiraffeThreshold),Double.toString(recognitionThreshold)};
+                outputWriter.writeNext(entries);
+            }
         }
     }
 
     private static void saveRecordsCollection(QueryRecordsCollection queryRecordsCollection) {
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(QUERY_RECORDS_JSON));
+            writer = new BufferedWriter(new FileWriter(FilePath.ONE_VS_ONE_QUERY_RECORDS_JSON.toString()));
             writer.write(queryRecordsCollection.toJsonString());
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,7 +147,7 @@ public class ComputePerAnnotationThresholdsBigDatabase {
         BufferedReader reader = null;
         QueryRecordsCollection queryRecordsCollection = null;
         try {
-            reader = new BufferedReader(new FileReader(QUERY_RECORDS_JSON));
+            reader = new BufferedReader(new FileReader(FilePath.ONE_VS_ONE_QUERY_RECORDS_JSON.toString()));
             queryRecordsCollection = QueryRecordsCollection.fromJsonString(reader.readLine());
         } catch (Exception e) {
             e.printStackTrace();
