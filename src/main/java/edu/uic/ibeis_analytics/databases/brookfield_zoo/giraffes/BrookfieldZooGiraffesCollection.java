@@ -1,11 +1,12 @@
 package edu.uic.ibeis_analytics.databases.brookfield_zoo.giraffes;
+
 import edu.uic.ibeis_java_api.api.Ibeis;
 import edu.uic.ibeis_java_api.api.IbeisIndividual;
-import edu.uic.ibeis_java_api.api.data.individual.IndividualNotes;
-import edu.uic.ibeis_java_api.api.data.individual.Size;
-import edu.uic.ibeis_java_api.api.data.individual.Weight;
-import edu.uic.ibeis_java_api.exceptions.BadHttpRequestException;
+import edu.uic.ibeis_java_api.api.individual.IndividualNotes;
+import edu.uic.ibeis_java_api.api.individual.Size;
+import edu.uic.ibeis_java_api.api.individual.Weight;
 import edu.uic.ibeis_java_api.exceptions.IndividualNameAlreadyExistsException;
+import edu.uic.ibeis_java_api.exceptions.MalformedHttpRequestException;
 import edu.uic.ibeis_java_api.exceptions.UnsuccessfulHttpRequestException;
 import edu.uic.ibeis_java_api.values.ConservationStatus;
 import edu.uic.ibeis_java_api.values.LengthUnitOfMeasure;
@@ -132,7 +133,6 @@ public class BrookfieldZooGiraffesCollection {
             } catch (IndividualNameAlreadyExistsException e) {
                 mithra = findIndividual(BrookfieldZooGiraffesDbNames.MITHRA.getValue());
             }
-
             //Potoka
             try {
                 potoka = ibeis.addIndividual(BrookfieldZooGiraffesDbNames.POTOKA.getValue());
@@ -167,7 +167,7 @@ public class BrookfieldZooGiraffesCollection {
                 zebra = findIndividual(BrookfieldZooGiraffesDbNames.ZEBRA.getValue());
             }
 
-        } catch (IOException | BadHttpRequestException | UnsuccessfulHttpRequestException e) {
+        } catch (IOException | MalformedHttpRequestException | UnsuccessfulHttpRequestException e) {
             e.printStackTrace();
         }
     }

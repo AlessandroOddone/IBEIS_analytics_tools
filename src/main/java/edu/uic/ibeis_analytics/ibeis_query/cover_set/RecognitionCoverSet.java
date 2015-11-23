@@ -39,16 +39,16 @@ public class RecognitionCoverSet implements Comparable<RecognitionCoverSet> {
 
     @Override
     public String toString() {
-        StringBuilder coveredAnnotsSringBuilder = new StringBuilder();
+        StringBuilder coveredAnnotsStringBuilder = new StringBuilder();
         for (IbeisAnnotation annotation : coveredAnnotations) {
-            coveredAnnotsSringBuilder.append(annotation.getId() + ",");
+            coveredAnnotsStringBuilder.append(annotation.getId() + ",");
         }
-        coveredAnnotsSringBuilder.deleteCharAt(coveredAnnotsSringBuilder.lastIndexOf(","));
+        coveredAnnotsStringBuilder.deleteCharAt(coveredAnnotsStringBuilder.lastIndexOf(","));
 
         return "[annotation_db_element:{aid:" + annotationDbElement.getAnnotation().getId() +
                 ",is_giraffe_threshold:" + annotationDbElement.getIsGiraffeThreshold() +
                 ",rec_threshold:" + annotationDbElement.getRecognitionThreshold() + "}" +
-                ",covered_aids: " + coveredAnnotsSringBuilder.toString() + "]";
+                ",covered_aids: " + "[" + coveredAnnotsStringBuilder.toString() + "]";
     }
 
     @Override

@@ -7,7 +7,7 @@ import edu.uic.ibeis_analytics.ibeis_query.algorithms.result.QueryAlgorithmResul
 import edu.uic.ibeis_analytics.ibeis_query.algorithms.result.Species;
 import edu.uic.ibeis_analytics.scripts.big_database.FilePath;
 import edu.uic.ibeis_java_api.api.*;
-import edu.uic.ibeis_java_api.exceptions.BadHttpRequestException;
+import edu.uic.ibeis_java_api.exceptions.MalformedHttpRequestException;
 import edu.uic.ibeis_java_api.exceptions.InvalidEncounterIdException;
 import edu.uic.ibeis_java_api.exceptions.UnsuccessfulHttpRequestException;
 
@@ -39,7 +39,7 @@ public class QueryAlgorithm {
         loadAnnotationElementsDb();
     }
 
-    public QueryAlgorithmResult execute() throws IOException, BadHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
+    public QueryAlgorithmResult execute() throws IOException, MalformedHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
         switch (selectedAlgorithm) {
             case BEST_SCORE:
                 return executeBestScore();
@@ -51,7 +51,7 @@ public class QueryAlgorithm {
         return null;
     }
 
-    private QueryAlgorithmResult executeBestScore() throws IOException, BadHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
+    private QueryAlgorithmResult executeBestScore() throws IOException, MalformedHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
         long startTime = System.nanoTime();
 
         IbeisQueryResult queryResult = ibeis.queryNoCache(queryAnnotation, getDbAnnotations());
@@ -67,7 +67,7 @@ public class QueryAlgorithm {
         return new QueryAlgorithmResult(highestScore.getDbAnnotation().getIndividual(), Species.GIRAFFE, System.nanoTime()-startTime);
     }
 
-    private QueryAlgorithmResult executeThresholdsOneVsOne() throws IOException, BadHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
+    private QueryAlgorithmResult executeThresholdsOneVsOne() throws IOException, MalformedHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
         long startTime = System.nanoTime();
 
         boolean isGiraffe = false;
@@ -98,7 +98,7 @@ public class QueryAlgorithm {
         return new QueryAlgorithmResult(System.nanoTime()-startTime);
     }
 
-    private QueryAlgorithmResult executeThresholdsOneVsAll() throws IOException, BadHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
+    private QueryAlgorithmResult executeThresholdsOneVsAll() throws IOException, MalformedHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
         long startTime = System.nanoTime();
 
         IbeisQueryResult queryResult = ibeis.queryNoCache(queryAnnotation, getDbAnnotations());
@@ -133,7 +133,7 @@ public class QueryAlgorithm {
         return new QueryAlgorithmResult(System.nanoTime()-startTime);
     }
 
-    private List<IbeisAnnotation> getDbAnnotations() throws IOException, BadHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
+    private List<IbeisAnnotation> getDbAnnotations() throws IOException, MalformedHttpRequestException, UnsuccessfulHttpRequestException, InvalidEncounterIdException {
         List<IbeisAnnotation> dbAnnotations = new ArrayList<>();
         for(AnnotationDbElement e : orderedAnnotationElementsDb) {
             dbAnnotations.add(e.getAnnotation());

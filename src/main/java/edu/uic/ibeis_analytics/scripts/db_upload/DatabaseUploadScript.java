@@ -1,8 +1,8 @@
 package edu.uic.ibeis_analytics.scripts.db_upload;
 
-import edu.uic.ibeis_analytics.databases.DatabaseUploader;
 import edu.uic.ibeis_analytics.databases.brookfield_zoo.giraffes.BrookfieldZooGiraffesCollection;
 import edu.uic.ibeis_java_api.api.IbeisIndividual;
+import edu.uic.ibeis_java_api.database_upload_tools.hotspotter.HotspotterDatabaseUploader;
 
 import java.io.File;
 import java.util.Collection;
@@ -22,16 +22,38 @@ public class DatabaseUploadScript {
     private static final Collection<IbeisIndividual> individuals = new BrookfieldZooGiraffesCollection().getIndividuals();
 
     public static void main(String args[]) {
+        /*
         //upload main db
-        //new DatabaseUploader(new File(DB_MAIN_FOLDER), DB_ENCOUNTER_NAME, individuals).execute();
+        try {
+            new HotspotterDatabaseUploader(new File(DB_MAIN_FOLDER), DB_ENCOUNTER_NAME, individuals).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        */
 
+        /*
         //upload test db
-        //new DatabaseUploader(new File(TEST_MAIN_FOLDER), TEST_ENCOUNTER_NAME, individuals).execute();
+        try {
+            new HotspotterDatabaseUploader(new File(TEST_MAIN_FOLDER), TEST_ENCOUNTER_NAME, individuals).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        */
 
+        /*
         //upload validation db
-        new DatabaseUploader(new File(VALIDATION_MAIN_FOLDER), VALIDATION_ENCOUNTER_NAME, individuals).execute();
+        try {
+            new HotspotterDatabaseUploader(new File(VALIDATION_MAIN_FOLDER), VALIDATION_ENCOUNTER_NAME, individuals).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        */
 
         //upload big db
-        //new DatabaseUploader(new File(BIG_DB_MAIN_FOLDER), BIG_DB_ENCOUNTER_NAME, individuals).execute();
+        try {
+            new HotspotterDatabaseUploader(new File(BIG_DB_MAIN_FOLDER), BIG_DB_ENCOUNTER_NAME, individuals).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
