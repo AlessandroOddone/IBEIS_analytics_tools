@@ -1,8 +1,10 @@
 # name table
-# NumData 5
+# NumData 10
 #   nid,     name
-      2,   Mithra
-      3,   Potoka
-      4,   Franny
-      5,  Arnieta
-      6,    Zebra
+      2,  Arnieta
+      3,   Jasiri
+      4,   Mithra
+      5,   Potoka
+      6,    Other
+      7,    Zebra
+      8,      NAG
