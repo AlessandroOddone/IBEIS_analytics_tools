@@ -93,6 +93,7 @@ public class IdentificationProcessValidationScript {
                 }
                 validationResultsCollection.add(new ValidationQueryResult(queryAnnotation, speciesRecognitionOutcome,
                         individualRecognitionOutcome, computationTime));
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
